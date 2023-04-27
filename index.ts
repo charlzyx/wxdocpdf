@@ -9,7 +9,7 @@ const clz = {
 
 const pad = (x: number) => x < 10 ? `0${x}` : `${x}`;
 
-const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-'): '';
+const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-') : '';
 
 (async () => {
   // Setup
@@ -62,7 +62,7 @@ const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-'): ''
     }
     return memo;
 
-  }, { lite: [], map: {}} as any)
+  }, { lite: [], map: {} } as any)
   const browser2 = await chromium.launch({ headless: false });
   const context2 = await browser2.newContext({
     viewport: {
@@ -83,6 +83,7 @@ const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-'): ''
         document.querySelector('.navbar')?.remove()
         document.querySelector('.fixed-btns')?.remove()
         document.querySelector('.subnavbar')?.remove()
+        document.querySelector('.sidebar__wrp')?.remove()
         document.querySelector('.sidebar')?.remove()
         document.querySelector('.main-container')?.removeAttribute("class");
         document.querySelector('.main-container')?.setAttribute("class", 'not-at-all')
