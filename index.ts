@@ -25,8 +25,27 @@ const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-') : '
   // The actual interesting bit
   await context.route('**.jpg', route => route.abort());
   await page.goto('https://developers.weixin.qq.com/miniprogram/dev/framework/quickstart/');
-  const locator = page.locator(clz.lv3);
-  const list = await locator.evaluateAll((els) => {
+  const list2 = await page.locator(clz.lv2).evaluateAll((els) => {
+
+    const getParent = (el: HTMLElement | null, ifif = (e: HTMLElement) => false) => {
+      if (!el) return;
+      if (ifif(el)) {
+        return el
+      }
+      return getParent(el.parentElement, ifif)
+    }
+
+    return els.map(el => {
+      const p1 = getParent(el.parentElement as any, (e) => e.classList.contains('NavigationLevel--level-1'));
+
+      return {
+        href: 'https://developers.weixin.qq.com' + el.getAttribute("href"),
+        title1: p1.querySelector('.NavigationLevel__parent a').innerText.trim(),
+        title2: (el as any).innerText.trim(),
+      }
+    })
+  })
+  const list3 = await page.locator(clz.lv3).evaluateAll((els) => {
 
     const getParent = (el: HTMLElement | null, ifif = (e: HTMLElement) => false) => {
       if (!el) return;
@@ -49,20 +68,15 @@ const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-') : '
     })
   })
 
-  const unique = list.reduce((memo, item) => {
+  const unique = [...list3, ...list2].reduce((memo, item) => {
     const [link, hash] = item.href.split("#")
-    if (hash && !memo.map[link]) {
-      memo.lite.push(item);
-      memo.map[link] = hash;
-      return memo;
-    } else if (!hash) {
-      memo.lite.push(item)
-      memo.map[link] = true;
-      return memo;
-    }
+    if (memo.map[link]) return memo;
+    memo.lite.push(item);
+    memo.map[link] = hash || true;
     return memo;
 
   }, { lite: [], map: {} } as any)
+
   const browser2 = await chromium.launch({ headless: false });
   const context2 = await browser2.newContext({
     viewport: {
@@ -70,7 +84,8 @@ const safeName = (x: string) => x ? x.replace(/\s/g, '').replace(/\//g, '-') : '
       height: 1600
     }
   });
-  const runinng = async (items: typeof list, prefix = 0) => {
+
+  const runinng = async (items: any[], prefix = 0) => {
     if (items.length < 0) return;
     const wip = items.splice(0, 10);
     await Promise.all(wip.map(async (item, idx) => {
